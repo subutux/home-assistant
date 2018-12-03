@@ -372,7 +372,13 @@ def _async_get_action(hass, config, name):
         _LOGGER.info('Executing %s', name)
         hass.components.logbook.async_log_entry(
             name, 'has been triggered', DOMAIN, entity_id)
-        await script_obj.async_run(variables, context)
+
+        try:
+            await script_obj.async_run(variables, context)
+        except Exception as err:  # pylint: disable=broad-except
+            script_obj.async_log_exception(
+                _LOGGER,
+                'Error while executing automation {}'.format(entity_id), err)
 
     return action
 
